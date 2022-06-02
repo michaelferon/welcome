@@ -1,0 +1,17 @@
+#! /usr/bin/env bash
+
+bin="$(dirname "$(readlink -f "$0")")"
+
+os='macOS Monterey 12.4 21F79'
+kernel="$(uname -srm)"
+model="$(sysctl -n hw.model)"
+shell="$($SHELL --version | awk '{ print $1,$2 }')"
+
+cpu="$(sysctl -n machdep.cpu.brand_string)"
+cpu="${cpu//(R) Core(TM)/}"
+cpu="${cpu//CPU /}"
+
+HOSTNAME="$(hostname)"
+HOSTNAME="${HOSTNAME//fios-router./}"
+
+${bin}/b.out "$USER" "$HOSTNAME" "$os" "$kernel" "$model" "$cpu" "$shell"

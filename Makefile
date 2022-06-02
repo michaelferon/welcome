@@ -1,24 +1,37 @@
 SHELL = $$SHELL
 SRC = ./src
-BLD = ./build
-CXX = g++ -std=c++17 -Ofast
+BIN = ./bin
+CXX = g++ -std=c++17 -Ofast -march=native
 
-target = $(BLD)/a.out
-source = $(SRC)/main.cpp
+target = $(BIN)/a.out
+source = $(SRC)/welcome.cpp
 
+neofetch_target = $(BIN)/b.out
+neofetch_source = $(SRC)/neofetch.cpp
+
+
+all : $(target) $(neofetch_target)
 $(target) : $(source)
+	$(CXX) $< -o $@
+$(neofetch_target) : $(neofetch_source)
 	$(CXX) $< -o $@
 
 
-.PHONY : list run time clean
+.PHONY : list welcome neofetch time clean
 list :
-	@echo $$(tput bold)make$$(tput sgr0):
-	@echo "  run   -- execute welcome script"
-	@echo "  time  -- time welcome script"
-	@echo "  clean -- remove  executable"
-run : $(target)
-	$(BLD)/welcome 'Welcome  Michael'
+	@echo "$$(tput bold)make$$(tput sgr0):" &&
+	@echo "  welcome   -- execute welcome script" &&
+	@echo "  neofetch  -- execute neofetch script" &&
+	@echo "  time      -- time welcome/neofetch scripts" &&
+	@echo "  clean     -- remove  executables"
+welcome : $(target)
+	$(BIN)/welcome 'Welcome  Michael'
+neofetch : $(neofetch_target)
+	$(BIN)/neofetch
 time : $(target)
-	time $(BLD)/welcome 'Welcome  Michael'
+	time $(BIN)/welcome 'Welcome  Michael'
+	@echo
+	time $(BIN)/neofetch
 clean :
-	@rm $(target) && echo 'Target removed.'
+	rm $(target) $(neofetch_target)
+	@echo 'Targets removed.'

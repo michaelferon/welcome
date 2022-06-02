@@ -29,21 +29,21 @@
 ####################################################################################
 
 
-## Library.
-lib='/Users/michaelferon/Projects/welcome'
+## Binary directory.
+bin="$(dirname "$(readlink -f "$0")")"
 
 ## Number of columns in current device window.
-window_size=`stty -a <"$(tty)" | head -n1 | awk '{ print $6 }'`
+window_size="$(stty size | awk '{ print $2 }')"
 
 ## Data.
-data="`df -H |
-    grep --max-count=1 '^/dev/disk1s1' |
-    awk '{ print $1,$2,$3,$4,$5 }'`"
-cpu_data="`ps -A -o %cpu,%mem |
-    awk '{ cpu += $1; mem += $2 } END { printf("%.1f %.1f", cpu, mem) }'`"
+data="$(df -H /System/Volumes/Data | tail -n1 | awk '{ print $1,$2,$3,$4,$5 }')"
+cpu_data="$(
+    ps -A -o %cpu,%mem |
+    awk '{ cpu += $1; mem += $2 } END { printf("%.1f %.1f", cpu, mem) }'
+)"
 
-## figlet message. <- Welcome message is now handled in  .
-message="${1:-System Status}"
+## figlet message.
+message="${1:-Welcome}"
 figlet -w "$window_size" -c "$message" #| lolcat # <- very slow (runtime x10)
 
-"${lib}/build/a.out" "$data $window_size $cpu_data"
+"${bin}/a.out" "$data $window_size $cpu_data"

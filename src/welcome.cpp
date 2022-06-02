@@ -11,9 +11,9 @@ string pad(string s, int n, char c) {
 
 int main(int argc, char** argv) {
 	// Colors.
-	string red = "\033[31m";
-	string green = "\033[32m";
-	string normal = "\033[0m";
+	string red = "[31m";
+	string green = "[32m";
+	string normal = "[0m";
 
 	// Input comes in as a single string; convert to string stream.
 	string input = string(argv[1]);
@@ -62,7 +62,8 @@ int main(int argc, char** argv) {
 		 << block_pad << percent_used_line << "\n\n";
 
 	cout << cpu_pad + "CPU: " << setw(cpu_max_length) << cpu << "\n"
-		 << cpu_pad + "MEM: " << setw(cpu_max_length) << mem << "\n";
+		 << cpu_pad + "MEM: " << setw(cpu_max_length) << mem << "\n"
+		 << "\n";
 
 	return 0;
 }
