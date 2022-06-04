@@ -1,0 +1,9 @@
+os='macOS Monterey 12.4 21F79'
+kernel='Darwin 21.5.0 x86_64'
+model='MacBookPro12,1'
+shell='zsh 5.9'
+cpu='Intel i5-5257U @ 2.70GHz'
+gpu='Intel Iris Graphics 6100'
+mem_total='8192'
+pagesize='4096'
+names=("OS" "Kernel" "Host" "Shell" "CPU" "GPU" "Memory")

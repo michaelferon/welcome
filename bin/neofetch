@@ -1,17 +1,65 @@
 #! /usr/bin/env bash
 
-bin="$(dirname "$(readlink -f "$0")")"
+root="$(dirname "$(readlink -f "$0")")/.." # root directory.
+config="${root}/cache/config" # configuration file.
 
-os='macOS Monterey 12.4 21F79'
-kernel="$(uname -srm)"
-model="$(sysctl -n hw.model)"
-shell="$($SHELL --version | awk '{ print $1,$2 }')"
+[ "$1" = 'config' ] && {
+    # OS info.
+    IFS=$'\n' read -d "" -ra os_data <<< "$(awk -F'<|>' '/key|string/ { print $3 }' \
+        "/System/Library/CoreServices/SystemVersion.plist")"
+    os="macOS Monterey ${os_data[9]} ${os_data[1]}"
 
-cpu="$(sysctl -n machdep.cpu.brand_string)"
-cpu="${cpu//(R) Core(TM)/}"
-cpu="${cpu//CPU /}"
+    # Kernel info.
+    kernel="$(uname -srm)"
 
-HOSTNAME="$(hostname)"
-HOSTNAME="${HOSTNAME//fios-router./}"
+    # Model (Host) info.
+    model="$(sysctl -n hw.model)"
 
-${bin}/b.out "$USER" "$HOSTNAME" "$os" "$kernel" "$model" "$cpu" "$shell"
+    # Shell info.
+    shell="$($SHELL --version | awk '{ print $1,$2 }')"
+
+    # CPU info.
+    cpu="$(sysctl -n machdep.cpu.brand_string)"
+    cpu="${cpu//(R) Core(TM)/}"
+    cpu="${cpu//CPU /}"
+
+    # GPU info.
+    gpu="$(
+        system_profiler SPDisplaysDataType |\
+        awk -F': ' '/^\ *Chipset Model:/ { printf $2 ", " }'
+    )"
+    gpu="${gpu%,*}"
+
+    # Memory info.
+    mem_total="$(($(sysctl -n hw.memsize) / 1048576))"
+    pagesize="$(sysctl -n hw.pagesize)"
+
+    # Save to config.
+    echo "os='$os'"               >  "$config"
+    echo "kernel='$kernel'"       >> "$config"
+    echo "model='$model'"         >> "$config"
+    echo "shell='$shell'"         >> "$config"
+    echo "cpu='$cpu'"             >> "$config"
+    echo "gpu='$gpu'"             >> "$config"
+    echo "mem_total='$mem_total'" >> "$config"
+    echo "pagesize='$pagesize'"   >> "$config"
+
+    echo 'names=("OS" "Kernel" "Host" "Shell" "CPU" "GPU" "Memory")' >> "$config"
+} && exit 0
+
+source "$config"
+window_size="$(stty size | cut -d' ' -f2)"
+
+# Memory.
+IFS=$'\n' read -d "" -ra sysctl <<< "$(sysctl -n vm.page_pageable_internal_count vm.page_purgeable_count)"
+IFS=$'\n' read -d "" -ra vmstat <<< "$(vm_stat | awk '/ wired| occupied/')"
+pages_app="$((sysctl[0] - sysctl[1]))"
+pages_wired="${vmstat[0]##* }"
+pages_compressed="${vmstat[1]##* }"
+mem_used="$(((${pages_app} + ${pages_wired//.} + ${pages_compressed//.}) * pagesize / 1048576))"
+memory="${mem_used}MiB / ${mem_total}MiB ($((mem_used * 100 / mem_total))%)"
+
+${root}/bin/b.out \
+    "$window_size" "$USER" "$(hostname)" \
+    "$os" "$kernel" "$model" "$shell" "$cpu" "$gpu" "$memory" \
+    "${names[@]}"

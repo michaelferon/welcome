@@ -1,13 +1,25 @@
 #include <iostream>
 #include <string>
+using us = unsigned short;
 using namespace std;
 
 
-int main(int argc, char** argv) {
+us get_width(string* data, string* names, us N, us start) {
+    us max = start;
+    for (us i = 0; i < N; i++) {
+        us l = data[i].length() + names[i].length() + 2;
+        if (l > max) {
+            max = l;
+        }
+    }
 
-    const int width = 30;
-    const int n = 17;
-    string logo[n] = {
+    return max;
+}
+
+int main(int argc, char** argv) {
+    const us WIDTH = 30;   // Width of logo in characters.
+    const us HEIGHT = 17;  // Height of logo in lines.
+    string logo[HEIGHT] = {
         "[38;2;167;212;3m [39m[38;2;172;208;2m [39m[38;2;177;204;1m [39m[38;2;182;199;1m [39m[38;2;187;195;1m [39m[38;2;192;190;1m [39m[38;2;196;185;1m [39m[38;2;201;180;1m [39m[38;2;205;175;2m [39m[38;2;210;170;3m [39m[38;2;214;165;4m [39m[38;2;218;160;5m [39m[38;2;221;155;6m [39m[38;2;225;149;8m [39m[38;2;228;144;10m [39m[38;2;232;139;12m [39m[38;2;235;133;15m [39m[38;2;237;128;17m [39m[38;2;240;122;20m [39m[38;2;242;117;23m [39m[38;2;245;111;26mc[39m[38;2;247;106;30m.[39m[38;2;248;101;33m'[39m[38;2;250;95;37m[39m       ",
         "[38;2;201;180;1m [39m[38;2;205;175;2m [39m[38;2;210;170;3m [39m[38;2;214;165;4m [39m[38;2;218;160;5m [39m[38;2;221;155;6m [39m[38;2;225;149;8m [39m[38;2;228;144;10m [39m[38;2;232;139;12m [39m[38;2;235;133;15m [39m[38;2;237;128;17m [39m[38;2;240;122;20m [39m[38;2;242;117;23m [39m[38;2;245;111;26m [39m[38;2;247;106;30m [39m[38;2;248;101;33m [39m[38;2;250;95;37m [39m[38;2;251;90;41m,[39m[38;2;252;85;45mx[39m[38;2;253;80;49mN[39m[38;2;254;75;54mM[39m[38;2;254;70;58mM[39m[38;2;254;65;63m.[39m[38;2;254;61;68m[39m       ",
         "[38;2;228;144;10m [39m[38;2;232;139;12m [39m[38;2;235;133;15m [39m[38;2;237;128;17m [39m[38;2;240;122;20m [39m[38;2;242;117;23m [39m[38;2;245;111;26m [39m[38;2;247;106;30m [39m[38;2;248;101;33m [39m[38;2;250;95;37m [39m[38;2;251;90;41m [39m[38;2;252;85;45m [39m[38;2;253;80;49m [39m[38;2;254;75;54m [39m[38;2;254;70;58m [39m[38;2;254;65;63m.[39m[38;2;254;61;68mO[39m[38;2;254;56;72mM[39m[38;2;254;52;77mM[39m[38;2;253;47;82mM[39m[38;2;252;43;87mM[39m[38;2;251;39;93mo[39m[38;2;249;35;98m[39m        ",
@@ -27,33 +39,51 @@ int main(int argc, char** argv) {
         "[38;2;11;229;143m [39m[38;2;13;232;137m [39m[38;2;15;235;132m [39m[38;2;18;238;126m [39m[38;2;21;241;121m [39m[38;2;24;243;115m [39m[38;2;27;245;110m [39m[38;2;31;247;105m\"[39m[38;2;34;249;99mc[39m[38;2;38;250;94mo[39m[38;2;42;252;89mo[39m[38;2;46;253;84mc[39m[38;2;50;253;79m*[39m[38;2;55;254;74m\"[39m[38;2;59;254;69m [39m[38;2;64;254;64m [39m[38;2;69;254;59m [39m[38;2;74;254;55m [39m[38;2;79;253;50m\"[39m[38;2;84;253;46m*[39m[38;2;89;252;42mc[39m[38;2;94;250;38mo[39m[38;2;99;249;34mo[39m[38;2;105;247;31m'[39m[38;2;110;245;27m\"[39m[38;2;115;243;24m[39m[0m     "
     };
 
-
-    string user = argv[1];
-    string hostname = argv[2];
-    string os = argv[3];
-    string kernel = argv[4];
-    string model = argv[5];
-    string cpu = argv[6];
-    string shell = argv[7];
-
-    string space = "      ";
-    string title_color = "[1m";
-    string subtitle_color = "[33m";
-    string reset = "[0m";
-
-
-    for (int i = 0; i < (n - argc + 1) / 2; i++) {
-        cout << logo[i] << "\n";
+    const us N = (argc - 4) / 2;    // Number of display elements.
+    string* data = new string[N];   // System info.
+    string* names = new string[N];  // Display names.
+    for (us i = 0; i < N; i++) {
+        data[i] = argv[i + 4];
+        names[i] = argv[N + i + 4];
     }
-    cout << logo[5] << space << title_color << user << reset << "@" << title_color << hostname << reset << "\n";
-    cout << logo[6] << space << string(user.length() + hostname.length() + 1, '-') << "\n";
-    cout << logo[7] << space << subtitle_color << "OS" << reset << ": " << os << "\n";
-    cout << logo[8] << space << subtitle_color << "Kernel" << reset << ": " << kernel << "\n";
-    cout << logo[9] << space << subtitle_color << "Host" << reset << ": " << model << "\n";
-    cout << logo[10] << space << subtitle_color << "CPU" << reset << ": " << cpu << "\n";
-    cout << logo[11] << space << subtitle_color << "Shell" << reset << ": " << shell << "\n";
-    for (int i = 12; i < 17; i++) {
-        cout << logo[i] << "\n";
+    us window_size = stoi(argv[1]);   // Window size.
+    string user = argv[2];            // Username.
+    string hostname = argv[3];        // Hostname.
+    us title_length = user.length() + hostname.length() + 1;
+
+
+    string main_color = "[1m";  // user@hostname color.
+    string sub_color = "[33m";  // Display names color.
+    string reset = "[0m";       // Reset color.
+    string space = "        ";    // Space between mac logo and system info.
+
+    string pad = string(
+        ( window_size - get_width(data, names, N, title_length) - space.length() - WIDTH ) / 2,
+        ' '
+    );
+
+
+    // Display fisrt lines of logo with no accompanying system info.
+    us i;
+    for (i = 0; i < (HEIGHT - N - 2) / 2; i++) {
+        cout << pad << logo[i] << "\n";
+    }
+
+    // user@hostname.
+    cout << pad << logo[i] << space << main_color << user << reset << "@" << main_color << hostname << reset << "\n";
+    // underline.
+    cout << pad << logo[i + 1] << space;
+    for (us j = 0; j < title_length; j++) { cout << '-'; }
+    cout << "\n";
+
+    // Display system info.
+    for (us j = 0; j < N; j++) {
+        cout << pad << logo[i + j + 2] << space << sub_color << names[j] << reset << ": " << data[j] << "\n";
+    }
+
+    // Display last lines of logo with no accompanying system info.
+    for (us j = i + N + 2; j < HEIGHT; j++) {
+        cout << pad << logo[j] << "\n";
     }
     cout << "\n";
 
